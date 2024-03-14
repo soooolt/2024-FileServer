@@ -73,7 +73,7 @@
 ## 5.データベースの構成
 ![image](https://github.com/soooolt/2024-FileServer/assets/126924993/761e8788-1bd9-4e83-ba30-728bf6e78a80)
 ```erDiagram
-
+erDiagram
     Media ||--|{ MediaTag : has
     Tag ||--|{ MediaTag : has
     MediaType ||--|| Media : "is a type of"
