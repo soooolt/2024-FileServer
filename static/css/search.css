@@ -4,3 +4,157 @@
 * 作成日: 2024年3月15日
 * 更新日: 2024年3月15日
 *******************************************************************************/
+
+/* 水平垂直方向で中心に配置 */
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/*--基本スタイル-------------------------------------------*/
+/* ヘッダー */
+.header {
+    padding: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+/* ボディ */
+body {
+    font-family: Arial, sans-serif;
+}
+/* ボタン */
+a {
+    color: #8b9ba9; /* ホバー時のテキストの色 */
+    text-decoration: none; /* ホバー時の下線を削除 */
+}
+/* 入力フォーム */
+input {
+    background-color: #ffffff;  /* 背景色は白 */
+    border: 0;                    /* 枠線を削除 */
+}
+
+/* コンテンツリスト */
+.content-list {
+    padding: 5px;
+}
+
+
+/* フィルタパネル */
+.filter-panel {
+
+}
+
+/*--詳細-----------------------------------------*/
+/* ホームページアイコン 
+* 筆記体のロゴフォントを使用
+* 太字にする
+* サイズは大きめ
+* 上下左右の中心に配置
+*/
+.page-rogo {
+    font-family: 'Dancing Script', cursive;
+    font-weight: bold;
+    font-size: 25px;
+    text-align: center;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+/* 検索フォーム */
+.search-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    border: 0;
+    font-size: 20px;
+    text-align: center;
+}
+
+/* タグ入力フォーム */
+.add-tag-input{
+    width: 100%;
+}
+
+/* フィルタパネルボタン */
+.btn.active {
+    color: white;
+    background-color: #37474f;
+}
+
+.thumbnail-color {
+    width: 100%;
+    border-radius: 10px;    /* 角を丸くする */
+    padding: 0%;
+    margin: 10px;
+}
+
+.thumbnail a {
+    display: inline-block; /* border-radiusを適用するために必要 */
+    border-radius: 10px;    /* 角を丸くする */
+    overflow: hidden;       /* 子要素の画像が角丸の外に出ないようにする */
+}
+
+.thumbnail a img {
+    object-fit: cover;      /* 画像を縦横比1:1に切り取る */
+    width: 100%;            /* thumbnailのdivの幅に合わせる */
+    height: 100%;           /* thumbnailのdivの幅に合わせる */
+    aspect-ratio: 1 / 1;    /* 縦横比を1:1に保つ */
+}
+.thumbnail p {
+    color: #8b9ba9;
+    font-size: auto;
+    font-weight: bold;      /* 太字 */
+    margin: 0px;
+    padding: 0px;
+    text-decoration: none;  /* テキストの下線を削除 */
+}
+
+.title-text {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0px;
+}
+
+.wrap {
+    display: -ms-flexbox;
+    display: -webkit-box;
+    display: flex;
+    -ms-flex-align: center;
+    -webkit-box-align: center;
+    align-items: center;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    /* margin: -3px auto; */
+    border: none;
+}
+
+.wrap i {
+    font-size: 20px;
+    color: #8b9ba9;
+    margin: 0 5px;
+}
+
+a.tag-item {
+    display: flex;              /* フレックスボックスとして扱う */
+    justify-content: center;    /* 横方向の中心に配置 */
+    align-items: center;        /* 縦方向の中心に配置 */
+    border-radius: 15%;         /* 角を丸くする */
+    color: #8b9ba9;           /* テキストの色 */
+
+    padding: 0px 1px;   /* ボタンの内側のスペース */
+    margin: 0 0 0 3px;  /* ボタンの外側のスペース */
+}
+
+a.tag-add-botton {
+    display: flex;              /* フレックスボックスとして扱う */
+    justify-content: center;    /* 横方向の中心に配置 */
+    align-items: center;        /* 縦方向の中心に配置 */
+    color: #8b9ba9;           /* テキストの色 */
+    font-weight: bold;          /* 太字 */
+    font-size: 10px;            /* 文字のサイズ */
+
+    padding: 2px;   /* ボタンの内側のスペース */
+    margin:  3px;  /* ボタンの外側のスペース */
+}

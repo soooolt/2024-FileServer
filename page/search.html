@@ -5,21 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap読み込み -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+        
     <!-- ローカルファイル読み込み -->
     <link rel="stylesheet" href="static\css\base.css">
-    <link rel="stylesheet" href="static\css\index.css">
+    <link rel="stylesheet" href="static\css\search.css">
     <script src="static\js\script.js"></script>
     
     <title>search</title>
 </head>
 
 <body>
+    <!-- ヘッダー -->
+    {{template "header.html"}}
     
+    <!-- コンテンツ一覧 -->
+    <div class="main base-color">
+        <section class="container-fluid">
+            <div class="row row-cols-3 g-2">
+                {{range $index, $_ := .fileinfos}}
+                <div id="content-panel" class="content-list col d-flex flex-column justify-content-center align-items-center">
+                    <div class="main-color thumbnail thumbnail-color">
+                        <!-- 画像本体 -->
+                        <a href="/view?filename={{.Name}}" class="d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{.Path}}" alt="{{.Name}}" class="img-fluid center w-100">
+                            <p class="text-center w-100">{{.Name}}</p>
+                        </a>
+                        <!-- タグの表示 -->
+                        <div class="caption">
+                            <!-- タグ一覧 -->
+                            <div class="row">
+                                <div class = "wrap">
+                                    <i>Tag:</i>
+                                    {{range .Tags}}
+                                        <a class="tag-item accent-color base-color-text" href="">{{.}}</a>
+                                    {{end}}
+                                    <!-- タグ追加キー -->
+                                    <a class="tag-add-botton" href="#" onclick="showInputForm(event, 'inputForm{{$index}}')">+</a>
+            
+                                    <!-- 隠れている入力フォーム -->
+                                    <div id="inputForm{{$index}}" style="display: none;">
+                                        <form action="/add_tag" method="get">
+                                            <div class="input-group input-group-sm">
+                                                <!-- タグの入力 -->
+                                                <input id="input-add-tag" type="text" name="add_tag" class="add-tag-input" placeholder="Search" onkeypress="return handleKeyPress(event)">
+                                                <!-- 画像IDの入力（隠しフィールド） -->
+                                                <input type="hidden" name="image_id" value="{{$index}}">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </section>
+    </div>
+
+    <!-- フッター -->
+    {{template "footer.html"}}
 </body>
 
 </html>

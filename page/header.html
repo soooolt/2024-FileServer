@@ -1,0 +1,39 @@
+<div class="header accent-color">
+    <div class="container-fluid pt-3">
+        <div class="row">
+            <!-- ページロゴ -->
+            <div class="col-2 pt-2">
+                <a class="btn base-color-text" href="/" role="button"><i class="bi bi-folder2 page-rogo"> Fileserver </i></a>
+            </div>
+            <!-- 検索フォーム -->
+            <div class="col-8 mb-2">
+                <!-- 入力フォーム -->
+                <form action="/search" method="get">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="tag" class="form-control" placeholder="Search">
+                        <!-- 虫眼鏡アイコン -->
+                        <div class="icon base-color">
+                            <button class="btn btn-transparent main-color-text" type="submit"><i class="bi bi-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- グリッドアイコン -->
+            <div class="col-2">
+                <a class="btn base-color-text" href="#" role="button"><span class="bi bi-grid"></span></a>
+            </div>
+        </div>
+    </div>
+    <!-- フィルタパネル -->
+    <div class="container-fluid filter-panel">
+        <div class="row-cols align-items-center p-2">
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Movie</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Gif</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Image</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Manga</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">3D</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">2D</button>
+            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Real</button>
+        </div>
+    </div>
+</div>

@@ -4,3 +4,22 @@
 * 作成日: 2024年3月15日
 * 更新日: 2024年3月15日
 *******************************************************************************/
+/*--基本カラー-------------------------------------------*/
+.base-color {
+    background-color: #37474f
+}
+.main-color {
+    background-color: #cacaca;
+}
+.accent-color {
+    background-color: #ffd966;
+}
+.base-color-text {
+    color: #37474f;
+}
+.main-color-text {
+    color: #cacaca;
+}
+.accent-color-text {
+    color: #ffd966;
+}
