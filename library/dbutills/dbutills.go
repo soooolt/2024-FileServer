@@ -41,7 +41,8 @@ func InitDB() {
         );`,
 		`CREATE TABLE Tag (
             ID INTEGER PRIMARY KEY,
-            TAG TEXT NOT NULL
+            TAG TEXT NOT NULL,
+			TAG_JAPANESE TEXT
         );`,
 		`CREATE TABLE MediaTag (
             Media_ID INTEGER,
