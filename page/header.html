@@ -1,4 +1,4 @@
-<div class="header accent-color">
+<div class="header accent-color base-color-text">
     <div class="container-fluid pt-3">
         <div class="row">
             <!-- ページロゴ -->
@@ -6,34 +6,112 @@
                 <a class="btn base-color-text" href="/" role="button"><i class="bi bi-folder2 page-rogo"> Fileserver </i></a>
             </div>
             <!-- 検索フォーム -->
-            <div class="col-8 mb-2">
-                <!-- 入力フォーム -->
-                <form action="/search" method="get">
-                    <div class="input-group input-group-sm">
-                        <input type="text" name="tag" class="form-control" placeholder="Search">
-                        <!-- 虫眼鏡アイコン -->
-                        <div class="icon base-color">
-                            <button class="btn btn-transparent main-color-text" type="submit"><i class="bi bi-search"></i></button>
+            <div class="col-4 mb-2">
+                <!-- AND入力フォーム -->
+                <labal>
+                    <div class="d-flex"> <div class="flex-row">AND</div></div>
+                    <form action="/search" method="get">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="tag" class="form-control" placeholder="Search">
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </labal>
             </div>
-            <!-- グリッドアイコン -->
-            <div class="col-2">
-                <a class="btn base-color-text" href="#" role="button"><span class="bi bi-grid"></span></a>
+            <div class="col-2 mb-2">
+                <!-- OR入力フォーム -->
+                <label>
+                    <div class="d-flex"> <div class="flex-row">OR</div></div>
+                    <form action="/search" method="get">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="tag" class="form-control" placeholder="Search">
+                        </div>
+                    </form>
+                </label>
+            </div>
+            <div class="col-2 mb-2">
+                <!-- NOT入力フォーム -->
+                <label>
+                    <div class="d-flex"> <div class="flex-row">NOT</div></div>
+                    <form action="/search" method="get">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="tag" class="form-control" placeholder="Search">
+                        </div>
+                    </form>
+                </label>
+            </div>
+            <!-- 虫眼鏡アイコン -->
+            <div class="col-1 mb-2 icon base-color d-flex align-self-end" style="height: 30px;">
+                <button class="btn btn-transparent main-color-text align-self-center" type="submit" style="flex: 1;"><i class="bi bi-search"></i></button>
             </div>
         </div>
     </div>
     <!-- フィルタパネル -->
-    <div class="container-fluid filter-panel">
-        <div class="row-cols align-items-center p-2">
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Movie</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Gif</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Image</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Manga</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">3D</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">2D</button>
-            <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Real</button>
+    <form action="/search/filter" method="post" id="filterForm">
+        <div class="container-fluid filter-panel">
+            <div class="row-cols align-items-center p-2">
+                <!-- ボタンの状態を保存するための隠しフィールド -->
+                <input type="hidden" id="FP_movie" name="FP_movie" value="false">
+                <input type="hidden" id="FP_animated" name="FP_animated" value="false">
+                <input type="hidden" id="FP_image" name="FP_image" value="false">
+                <input type="hidden" id="FP_audio" name="FP_audio" value="false">
+                <input type="hidden" id="FP_manga" name="FP_manga" value="false">
+                <input type="hidden" id="FP_3D" name="FP_3D" value="false">
+                <input type="hidden" id="FP_2D" name="FP_2D" value="false">
+                <input type="hidden" id="FP_Real" name="FP_Real" value="false">
+                <!-- フィルタボタン -->
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Movie</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Gif</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Image</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Manga</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">3D</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">2D</button>
+                <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="false">Real</button>
+                <script>
+                document.querySelectorAll('.toggle').forEach((button, index) => {
+                    button.addEventListener('click', () => {
+                        const newState = button.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
+                        button.setAttribute('aria-pressed', newState);
+                        // ボタンの状態に応じて隠しフィールドを更新
+                        switch (index) {
+                            case 0:
+                                document.getElementById('FP_movie').value = newState;
+                                break;
+                            case 1:
+                                document.getElementById('FP_animated').value = newState;
+                                break;
+                            case 2:
+                                document.getElementById('FP_image').value = newState;
+                                break;
+                            case 3:
+                                document.getElementById('FP_audio').value = newState;
+                                break;
+                            case 4:
+                                document.getElementById('FP_manga').value = newState;
+                                break;
+                            case 5:
+                                document.getElementById('FP_3D').value = newState;
+                                break;
+                            case 6:
+                                document.getElementById('FP_2D').value = newState;
+                                break;
+                            case 7:
+                                document.getElementById('FP_Real').value = newState;
+                                break;
+                        }
+                        // ボタンの状態に応じてスタイルを更新
+                        if (newState === 'true') {
+                            button.classList.remove('accent-color', 'base-color-text');
+                            button.classList.add('base-color', 'main-color-text');
+                        } else {
+                            button.classList.remove('base-color', 'main-color-text');
+                            button.classList.add('accent-color', 'base-color-text');
+                        }
+                    });
+                });
+                </script>
+                <!-- グリッド変更ボタン -->
+                <button type="submit" class="btn base-color-text align-self-center icon" role="button"><span class="bi bi-grid"></span></button>
+            </div>
         </div>
-    </div>
+    </form>
 </div>

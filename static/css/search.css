@@ -12,7 +12,6 @@
     align-items: center;
 }
 
-
 /*--基本スタイル-------------------------------------------*/
 /* ヘッダー */
 .header {
@@ -33,6 +32,11 @@ a {
 input {
     background-color: #ffffff;  /* 背景色は白 */
     border: 0;                    /* 枠線を削除 */
+}
+
+/* 検索ボタン */
+.search-button {
+    height: 30px;
 }
 
 /* コンテンツリスト */

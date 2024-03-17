@@ -27,7 +27,7 @@ const MusicDir = "contents/music"       /* 音楽ファイルのディレクト�
 /* HTMLファイルに埋め込むファイル情報 */
 type FileInfo struct {
 	ID   int      /* ファイルID */
-	TYPE int      /* ファイルタイプ */
+	TYPE string   /* ファイルタイプ */
 	Name string   /* ファイル名 */
 	Path string   /* ファイルパス */
 	Tags []string /* タグ */
@@ -92,18 +92,65 @@ func InitDB_Table() {
 	}
 }
 
+/* ファイルパス作成関数 */
+func GetFilePath(mediaType string, filename string) string {
+	var filePath string
+	switch mediaType {
+	case "image":
+		filePath = "../" + ImageDir + "/" + filename
+	case "movie":
+		filePath = "../" + MovieDir + "/" + filename
+	case "animated":
+		filePath = "../" + AnimatedDir + "/" + filename
+	case "audio":
+		filePath = "../" + MusicDir + "/" + filename
+	}
+	return filePath
+}
+
+/* タグ取得関数 */
+func GetTags(fileID int) []string {
+	/*--初期化---------------------------------------------*/
+	db, err := sql.Open("sqlite3", FilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	/*--データ取得-----------------------------------------*/
+	/* クエリの実行 */
+	rows, err := db.Query("SELECT Tag.TAG FROM Tag, MediaTag WHERE MediaTag.Media_ID = ? AND MediaTag.Tag_ID = Tag.ID", fileID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	/* タグの取得 */
+	var tags []string
+	for rows.Next() {
+		var tag string
+		err = rows.Scan(&tag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tags = append(tags, tag)
+	}
+
+	return tags
+}
+
 /* ディレクトリ内の情報をDBに入力する */
 func InitDB_Data() {
 	/* Imageファイルを取得 */
 	FileInfos := fileops.GetFileList(ImageDir)
 
-	// /* メディアテーブルに入力 */
-	// for _, fileInfo := range FileInfos {
-	// 	InsertFileInfo(fileInfo.Name, "image", fileInfo.Tags)
-	// }
+	/* メディアテーブルに入力 */
+	for _, fileInfo := range FileInfos {
+		InsertFileInfo(fileInfo.Name, "image", fileInfo.Tags)
+	}
 
-	// /* Movieファイルを取得 */
-	// FileInfos = fileops.GetFileList(MovieDir)
+	/* Movieファイルを取得 */
+	FileInfos = fileops.GetFileList(MovieDir)
 
 	/* メディアテーブルに入力 */
 	for _, fileInfo := range FileInfos {
@@ -119,7 +166,6 @@ func InitDB_Data() {
 	}
 }
 
-/* データベースからHTMLファイルに埋め込むデータを送信する */
 func GetFileInfo(AND_Tag []string, OR_Tag []string, NOT_Tag []string) []FileInfo {
 	/*--初期化---------------------------------------------*/
 	db, err := sql.Open("sqlite3", FilePath)
@@ -130,7 +176,7 @@ func GetFileInfo(AND_Tag []string, OR_Tag []string, NOT_Tag []string) []FileInfo
 
 	/*--データ取得-----------------------------------------*/
 	/* クエリの作成 */
-	query := "SELECT Media.ID, MediaType.ID, Media.NAME FROM Media, MediaType WHERE Media.MediaType_ID = MediaType.ID"
+	query := "SELECT Media.ID, MediaType.TYPE, Media.NAME FROM Media, MediaType WHERE Media.MediaType_ID = MediaType.ID"
 	var args []interface{}
 
 	if len(AND_Tag) > 0 || len(OR_Tag) > 0 || len(NOT_Tag) > 0 {
@@ -185,32 +231,10 @@ func GetFileInfo(AND_Tag []string, OR_Tag []string, NOT_Tag []string) []FileInfo
 		}
 
 		/* ファイルパスの作成 */
-		switch fileInfo.TYPE {
-		case 1: /* movie */
-			fileInfo.Path = "../" + MovieDir + "/" + fileInfo.Name
-		case 2: /* animated */
-			fileInfo.Path = "../" + AnimatedDir + "/" + fileInfo.Name
-		case 3: /* image */
-			fileInfo.Path = "../" + ImageDir + "/" + fileInfo.Name
-		case 4: /* audio */
-			fileInfo.Path = "../" + MusicDir + "/" + fileInfo.Name
-		}
+		fileInfo.Path = GetFilePath(fileInfo.TYPE, fileInfo.Name)
 
 		/* タグの取得 */
-		rows, err := db.Query("SELECT Tag.TAG FROM Tag, MediaTag WHERE MediaTag.Media_ID = ? AND MediaTag.Tag_ID = Tag.ID", fileInfo.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer rows.Close()
-
-		for rows.Next() {
-			var tag string
-			err = rows.Scan(&tag)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fileInfo.Tags = append(fileInfo.Tags, tag)
-		}
+		fileInfo.Tags = GetTags(fileInfo.ID)
 
 		/* FileInfoを追加 */
 		fileInfos = append(fileInfos, fileInfo)
@@ -309,4 +333,43 @@ func InsertMediaTag(mediaName string, tags []string) {
 			log.Fatal(err)
 		}
 	}
+}
+
+/* 名前から1ファイルの情報を取得し、FileInfo型に変換して返す */
+func GetFileInfoByName(filename string) FileInfo {
+
+	/* DBを開く */
+	db, err := sql.Open("sqlite3", FilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	/* クエリの実行 */
+	rows, err := db.Query("SELECT Media.ID, MediaType.TYPE, Media.NAME FROM Media, MediaType WHERE Media.MediaType_ID = MediaType.ID AND Media.NAME = ?", filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	/* FileInfo型にデータを格納 */
+	var fileinfo FileInfo
+	for rows.Next() {
+		/* ID, ファイルタイプ, ファイル名の格納 */
+		err = rows.Scan(&fileinfo.ID, &fileinfo.TYPE, &fileinfo.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		/* ファイルパスの作成 */
+		fileinfo.Path = GetFilePath(fileinfo.TYPE, fileinfo.Name)
+
+		/* タグの取得 */
+		fileinfo.Tags = GetTags(fileinfo.ID)
+	}
+
+	/* FileInfo型をlogに表示 */
+	log.Println(fileinfo)
+
+	return fileinfo
 }
