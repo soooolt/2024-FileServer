@@ -240,10 +240,10 @@ func GetFileInfo(AND_Tag []string, OR_Tag []string, NOT_Tag []string) []FileInfo
 		fileInfos = append(fileInfos, fileInfo)
 	}
 
-	/* FileInfo型をlogに表示 */
-	for _, fileInfo := range fileInfos {
-		log.Println(fileInfo)
-	}
+	// /* FileInfo型をlogに表示 */
+	// for _, fileInfo := range fileInfos {
+	// 	log.Println(fileInfo)
+	// }
 
 	return fileInfos
 }

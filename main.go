@@ -16,13 +16,21 @@ import (
 )
 
 /*--定数の定義-----------------------------------------------------------------*/
+const IndexHTML = "page.html"    /* 初期画面のHTMLファイル */
 const SearchHTML = "search.html" /* 検索画面のHTMLファイル */
 const ViewHTML = "view.html"     /* 閲覧画面のHTMLファイル */
 const StaticDir = "static"       /* 静的ファイルのディレクトリ */
 
 /*--構造体の定義---------------------------------------------------------------*/
 
-/* ユーザーのフィルタ状態 */
+/* タグ検索フォームの状態 */
+type TagSearchForm struct {
+	AND_Tag []string /* AND検索用タグ */
+	OR_Tag  []string /* OR検索用タグ */
+	NOT_Tag []string /* NOT検索用タグ */
+}
+
+/* ユーザーのフィルタパネルの状態 */
 type FilterPanel struct {
 	FP_movie    bool /* 動画ファイル表示許可 */
 	FP_animated bool /* 動く画像ファイル表示許可 */
@@ -33,6 +41,9 @@ type FilterPanel struct {
 	FP_2D       bool /* 2Dタグファイル表示許可 */
 	FP_Real     bool /* Realタグファイル表示許可 */
 }
+
+/* グローバル変数定義 */
+var fileinfos []dbutills.FileInfo /* ファイル情報 */
 
 /*--関数の定義-----------------------------------------------------------------*/
 // dbutills package
@@ -50,9 +61,8 @@ func main__() {
 /* 結合テスト用 main */
 func main() {
 	/* テスト用データベース構築 */
-	dbutills.DeleteMedia()
-	dbutills.InitDB_Data()
-	dbutills.GetFileInfo(nil, nil, nil)
+	// dbutills.DeleteMedia()
+	// dbutills.InitDB_Data()
 
 	/*--サーバーの設定-------------------------------------*/
 	router := gin.Default()
@@ -61,14 +71,15 @@ func main() {
 	router.LoadHTMLGlob("page/*.html")
 
 	/* "/"の時にindex.htmlを返す */
-	router.GET("/", SearchEndPoint)
+	router.GET("/", IndexEndPoint)
 
 	/* ファイル検索画面のレスポンス */
 	search := router.Group("/search")
 	{
-		search.GET("/Tag", SearctTagEndPoint)
-		search.POST("/filter", FilterPanelEndPoint)
-		search.GET("/filter", SearchEndPoint)
+		search.POST("/", SearchEndPoint)
+
+		/* ページネーション */
+		search.GET("/", paginationEndPoint)
 	}
 
 	/* ファイル閲覧画面のレスポンス */
@@ -88,15 +99,9 @@ func main() {
 	router.Run()
 }
 
-/*--ファイル検索画面-----------------------------------------------------------*/
-/* 検索なし */
-func SearchEndPoint(c *gin.Context) {
-	/* データベースから全ファイル情報を取得 */
-	fileinfos := dbutills.GetFileInfo(nil, nil, nil)
-
-	/* ページ番号を取得（デフォルトは1） */
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-
+/*--レスポンス以外の処理関数----------------------------------------------------*/
+/* ページ用データの抽出 */
+func ExtractionPage(fileinfos []dbutills.FileInfo, page int) ([]dbutills.FileInfo, int) {
 	/* ページあたりの要素数 */
 	perPage := 20
 
@@ -108,54 +113,10 @@ func SearchEndPoint(c *gin.Context) {
 	}
 	imagefileinfos := fileinfos[start:end]
 
-	/* logにFileinfoを出力 */
-	fmt.Println(imagefileinfos)
+	// /* logにFileinfoを出力 */
+	// fmt.Println(imagefileinfos)
 
-	c.HTML(200, SearchHTML, gin.H{
-		"fileinfos": imagefileinfos,
-		"prevPage":  page - 1,
-		"nextPage":  page + 1,
-		"hasPrev":   page > 1,
-		"hasNext":   end < len(fileinfos),
-		"total":     len(fileinfos), // ファイル情報の総数
-	})
-}
-
-/* タグ検索 */
-func SearctTagEndPoint(c *gin.Context) {
-	/* クエリパラメータを取得 */
-	AND_Tag := c.QueryArray("AND_Tag")
-	OR_Tag := c.QueryArray("OR_Tag")
-	NOT_Tag := c.QueryArray("NOT_Tag")
-
-	/* データベースからファイル情報を取得 */
-	fileinfos := dbutills.GetFileInfo(AND_Tag, OR_Tag, NOT_Tag)
-
-	/* ページ番号を取得（デフォルトは1） */
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-
-	/* ページあたりの要素数 */
-	perPage := 20
-
-	/* ファイル情報をページに応じて取り出す */
-	start := (page - 1) * perPage
-	end := start + perPage
-	if end > len(fileinfos) {
-		end = len(fileinfos)
-	}
-	imagefileinfos := fileinfos[start:end]
-
-	/* logにFileinfoを出力 */
-	fmt.Println(imagefileinfos)
-
-	c.HTML(200, SearchHTML, gin.H{
-		"fileinfos": imagefileinfos,
-		"prevPage":  page - 1,
-		"nextPage":  page + 1,
-		"hasPrev":   page > 1,
-		"hasNext":   end < len(fileinfos),
-		"total":     len(fileinfos), // ファイル情報の総数
-	})
+	return imagefileinfos, end
 }
 
 /* フィルタ情報から取得情報をフィルタして返す */
@@ -184,9 +145,59 @@ func FileInfoFilter(fileinfo []dbutills.FileInfo, filterPanel FilterPanel) []dbu
 	return result
 }
 
-/* フィルタパネル */
-func FilterPanelEndPoint(c *gin.Context) {
-	/* フィルタパネルの状態を取得 */
+/*--ファイル検索画面-----------------------------------------------------------*/
+/* 初期画面のレスポンス */
+func IndexEndPoint(c *gin.Context) {
+	/* データベースからファイル情報を取得 */
+	fileinfos = dbutills.GetFileInfo(nil, nil, nil)
+
+	/* ページ番号を取得（デフォルトは1） */
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	/* ページデータ取得 */
+	imagefileinfos, end := ExtractionPage(fileinfos, page)
+
+	/* HTMLを返す */
+	c.HTML(200, IndexHTML, gin.H{
+		"fileinfos": imagefileinfos,
+		"prevPage":  page - 1,
+		"nextPage":  page + 1,
+		"hasPrev":   page > 1,
+		"hasNext":   end < len(fileinfos),
+		"total":     len(fileinfos), // ファイル情報の総数
+	})
+}
+
+/* ページネーション */
+func paginationEndPoint(c *gin.Context) {
+	/* ページ番号を取得（デフォルトは1） */
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	/* ページデータ取得 */
+	imagefileinfos, end := ExtractionPage(fileinfos, page)
+
+	/* ページデータをHTMLにレンダリング */
+	c.HTML(200, IndexHTML, gin.H{
+		"fileinfos": imagefileinfos,
+		"prevPage":  page - 1,
+		"nextPage":  page + 1,
+		"hasPrev":   page > 1,
+		"hasNext":   end < len(fileinfos),
+		"total":     len(fileinfos), // ファイル情報の総数
+	})
+}
+
+/* ファイル検索画面のレスポンス */
+func SearchEndPoint(c *gin.Context) {
+	/* POSTパラメータからTagを取得 */
+	AND_Tag := c.PostFormArray("AND")
+	OR_Tag := c.PostFormArray("OR")
+	NOT_Tag := c.PostFormArray("NOT")
+
+	/* データベースからファイル情報を取得 */
+	fileinfos = dbutills.GetFileInfo(AND_Tag, OR_Tag, NOT_Tag)
+
+	/* POSTパラメータからフィルタパネルの状態を取得 */
 	filterPanel := FilterPanel{
 		FP_movie:    c.PostForm("FP_movie") == "true",
 		FP_animated: c.PostForm("FP_animated") == "true",
@@ -197,31 +208,30 @@ func FilterPanelEndPoint(c *gin.Context) {
 		FP_2D:       c.PostForm("FP_2D") == "true",
 		FP_Real:     c.PostForm("FP_Real") == "true",
 	}
-	/* logにFilterPanelの情報を出力 */
-	fmt.Println(filterPanel)
-
-	/* データベースからファイル情報を取得 */
-	filebuf := dbutills.GetFileInfo(nil, nil, nil)
 
 	/* フィルタパネルの状態に応じてフィルタ */
-	fileinfos := FileInfoFilter(filebuf, filterPanel)
+	filter_fileinfos := FileInfoFilter(fileinfos, filterPanel)
+
+	/* filterPanelをfilter_fileinfosで上書き */
+	fileinfos = filter_fileinfos
 
 	/* ページ番号を取得（デフォルトは1） */
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
-	/* ページあたりの要素数 */
-	perPage := 20
+	/* ページデータ取得 */
+	imagefileinfos, end := ExtractionPage(filter_fileinfos, page)
 
-	/* ファイル情報をページに応じて取り出す */
-	start := (page - 1) * perPage
-	end := start + perPage
-	if end > len(fileinfos) {
-		end = len(fileinfos)
+	/* パラメータから取得したものをlogに表示 */
+	fmt.Println("AND_Tag:", AND_Tag)
+	fmt.Println("OR_Tag:", OR_Tag)
+	fmt.Println("NOT_Tag:", NOT_Tag)
+	fmt.Println("filterPanel:", filterPanel)
+	fmt.Println("page:", page)
+
+	/* 表示されるファイルのタイプと名前を一行表示 */
+	for _, info := range imagefileinfos {
+		fmt.Println(info.TYPE, info.Name)
 	}
-	imagefileinfos := fileinfos[start:end]
-
-	/* logにFileinfoを出力 */
-	fmt.Println(imagefileinfos)
 
 	c.HTML(200, SearchHTML, gin.H{
 		"fileinfos": imagefileinfos,
@@ -232,6 +242,10 @@ func FilterPanelEndPoint(c *gin.Context) {
 		"total":     len(fileinfos), // ファイル情報の総数
 	})
 }
+
+// /* 要素をシャッフルする---*/
+// rand.Seed(time.Now().UnixNano())
+// rand.Shuffle(len(fileinfos), func(i, j int) { fileinfos[i], fileinfos[j] = fileinfos[j], fileinfos[i] })
 
 /*--ファイル閲覧画面-----------------------------------------------------------*/
 /* ファイル閲覧 */
