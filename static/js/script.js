@@ -37,10 +37,17 @@ const buttonToFilterMap = {
     'Real': 'FP_Real'
 };
 
+/* 表示列数 */
+let currentCols = 3;
+
+/* ソート順番  */
+let sort = 'Date';  /* Date or Popular or Random  */
+
 /*--関数定義-------------------------------------------------------------------*/
 /* /searchエンドポイントへfilterPanelとtagsをパラメータとしてPOST送信する */
 function postFilter() {
     let query = '';
+    /* タグの選択状態をクエリ文字列に追加 */
     for (const tagType in tags) {
         for (const tag of tags[tagType]) {
             if (tag) {
@@ -48,12 +55,14 @@ function postFilter() {
             }
         }
     }
-
+    /* フィルタパネルの状態をクエリ文字列に追加 */
     for (const filterName in filterPanel) {
         if (filterPanel[filterName]) {
             query += `&${filterName}=true`;
         }
     }
+    /* ソート順をクエリ文字列に追加 */
+    query += `&sort=${sort}`;
 
     // POSTリクエストを送信
     fetch('/search', {
@@ -75,7 +84,7 @@ function postFilter() {
     .catch(error => console.error('Error:', error));
 }
 
-/* ローカルストレージからfilterPanelとtagsを復元する */
+/* ローカルストレージから変数を復元する */
 function restoreFilter() {
     /* タグの選択状態 */
     tags['AND'] = JSON.parse(localStorage.getItem('AND')) || [];
@@ -98,6 +107,23 @@ function restoreFilter() {
         const filterName = buttonToFilterMap[buttonName];
         updateButtonStyle(button, filterPanel[filterName]);
     });
+
+    /* 現在の列数を取得 */
+    var dynamicCols = document.querySelector('#dynamic-cols');
+
+    /* 現在の列数を削除 */
+    dynamicCols.classList.remove('row-cols-' + currentCols);
+
+    /* 列数の復元 */
+    currentCols = parseInt(localStorage.getItem('cols'));
+    currentCols = ((2 <= currentCols) && (currentCols <= 5)) ? currentCols : 3;
+    
+    /* 列数を更新 */
+    document.querySelector('#dynamic-cols').classList.add('row-cols-' + currentCols);
+
+    /* ソート順の復元 */
+    sort = localStorage.getItem('sort') || 'Date';
+    document.querySelector('#selected-sort').textContent = sort;
 }
 
 /* ボタンのスタイルを変更 */
@@ -155,5 +181,37 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         /* フィルタを送信 */
         postFilter();
+    });
+
+    /* 列変更ボタン  */
+    document.querySelector('#change-cols').addEventListener('click', function() {
+        /* 現在の値を取得 */
+        var dynamicCols = document.querySelector('#dynamic-cols');
+
+        /* 現在の列数を削除 */
+        dynamicCols.classList.remove('row-cols-' + currentCols);
+    
+        /* 列数を変更 */
+        currentCols = (currentCols < 5) ? (currentCols + 1) : 2;
+        
+        /* ローカルストレージに保存 */
+        localStorage.setItem('cols', currentCols);
+
+        /* 列数を更新 */
+        dynamicCols.classList.add('row-cols-' + currentCols);
+    });
+
+    /* 並び替えドロップパネル */
+    var dropdownItems = document.querySelectorAll('.dropdown-item');
+    var selectedSort = document.querySelector('#selected-sort');
+
+    dropdownItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            selectedSort.textContent = this.textContent;
+            sort = this.textContent;
+
+            /* ローカルストレージに保存 */
+            localStorage.setItem('sort', sort);
+        });
     });
 });

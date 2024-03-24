@@ -9,10 +9,13 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"maia.go/library/dbutills"
+	"maia.go/library/fileops"
 )
 
 /*--定数の定義-----------------------------------------------------------------*/
@@ -52,16 +55,20 @@ var fileinfos []dbutills.FileInfo /* ファイル情報 */
 
 /*--関数の定義-----------------------------------------------------------------*/
 /* 単体テスト用 main */
-func main__() {
-	dbutills.DeleteMedia()
+func main_() {
+	/* テスト用データベース構築 */
+	fileops.DeleteDB()
+	dbutills.InitDB_Table()
+	dbutills.InitDB_MediaType()
 	dbutills.InitDB_Data()
-	dbutills.GetFileInfo(nil, nil, nil)
 }
 
 /* 結合テスト用 main */
 func main() {
 	/* テスト用データベース構築 */
-	// dbutills.DeleteMedia()
+	// fileops.DeleteDB()
+	// dbutills.InitDB_Table()
+	// dbutills.InitDB_MediaType()
 	// dbutills.InitDB_Data()
 
 	/*--サーバーの設定-------------------------------------*/
@@ -145,6 +152,35 @@ func FileInfoFilter(fileinfo []dbutills.FileInfo, filterPanel FilterPanel) []dbu
 	return result
 }
 
+/* FileInfoをシャッフルする */
+func ShuffleFileInfo(fileinfo []dbutills.FileInfo) []dbutills.FileInfo {
+	/* 要素をシャッフルする---*/
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(fileinfo), func(i, j int) {
+		fileinfo[i], fileinfo[j] = fileinfo[j], fileinfo[i]
+	})
+
+	/* シャッフルしたfileinfoを返す */
+	return fileinfo
+}
+
+/* 日付、人気、ランダムでソート */
+func SortFileInfo(fileinfo []dbutills.FileInfo, sort string) []dbutills.FileInfo {
+	/* 日付でソート */
+	if sort == "Date" {
+		/*--未実装--*/
+	}
+	/* 人気でソート */
+	if sort == "Popular" {
+		/*--未実装--*/
+	}
+	/* ランダムでソート */
+	if sort == "Random" {
+		fileinfo = ShuffleFileInfo(fileinfo)
+	}
+	return fileinfo
+}
+
 /*--ファイル検索画面-----------------------------------------------------------*/
 /* 初期画面のレスポンス */
 func IndexEndPoint(c *gin.Context) {
@@ -215,6 +251,12 @@ func SearchEndPoint(c *gin.Context) {
 	/* filterPanelをfilter_fileinfosで上書き */
 	fileinfos = filter_fileinfos
 
+	/* sort指定を取得 */
+	sort := c.PostForm("sort")
+
+	/* sort指定に応じてソート */
+	fileinfos = SortFileInfo(fileinfos, sort)
+
 	/* ページ番号を取得（デフォルトは1） */
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 
@@ -227,6 +269,7 @@ func SearchEndPoint(c *gin.Context) {
 	fmt.Println("NOT_Tag:", NOT_Tag)
 	fmt.Println("filterPanel:", filterPanel)
 	fmt.Println("page:", page)
+	fmt.Println("sort:", sort)
 
 	/* 表示されるファイルのタイプと名前を一行表示 */
 	for _, info := range imagefileinfos {
@@ -242,10 +285,6 @@ func SearchEndPoint(c *gin.Context) {
 		"total":     len(fileinfos), // ファイル情報の総数
 	})
 }
-
-// /* 要素をシャッフルする---*/
-// rand.Seed(time.Now().UnixNano())
-// rand.Shuffle(len(fileinfos), func(i, j int) { fileinfos[i], fileinfos[j] = fileinfos[j], fileinfos[i] })
 
 /*--ファイル閲覧画面-----------------------------------------------------------*/
 /* ファイル閲覧 */

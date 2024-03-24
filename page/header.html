@@ -43,12 +43,27 @@
             <div class="col-1 mb-2 icon base-color d-flex align-self-end" style="height: 30px;">
                 <button type="submit" class="search-trigger btn btn-transparent main-color-text align-self-center" type="submit" style="flex: 1;"><i class="bi bi-search"></i></button>
             </div>
+
+
         </div>
     </div>
     <!-- フィルタパネル -->
     <form action="/search" method="post" id="filterForm">
         <div class="container-fluid filter-panel">
             <div class="row-cols align-items-center p-2">
+                <!-- アップロードページ移行 -->
+                <a href="/upload" class="btn btn-outline-secondary border border-secondary">Upload</a>
+                <!-- 並び順選択ダウンパネル -->
+                <div class="dropdown p-2">
+                    <button class="btn dropdown-toggle btn-outline-secondary border border-secondary" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <p>Sort: <span id="selected-sort"></span></p>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="#">Date</a></li>
+                        <li><a class="dropdown-item" href="#">Random</a></li>
+                        <li><a class="dropdown-item" href="#">Popular</a></li>
+                    </ul>
+                </div>
                 <!-- ボタンの状態を保存するための隠しフィールド -->
                 <input type="hidden" id="FP_movie" name="FP_movie" value="true">
                 <input type="hidden" id="FP_animated" name="FP_animated" value="true">
@@ -67,7 +82,7 @@
                 <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="true">2D</button>
                 <button type="button" class="btn toggle btn-outline-secondary border border-secondary" data-toggle="button" aria-pressed="true">Real</button>
                 <!-- グリッド変更ボタン -->
-                <button type="button" class="btn base-color-text align-self-center icon" role="button"><span class="bi bi-grid"></span></button>
+                <button id="change-cols" type="button" class="btn base-color-text align-self-center icon" role="button"><span class="bi bi-grid"></span></button>
             </div>
         </div>
     </form>

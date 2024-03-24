@@ -1,7 +1,7 @@
 <!-- コンテンツ一覧 -->
 <div class="main base-color">
     <section class="container-fluid">
-        <div class="row row-cols-3 g-2">
+        <div id="dynamic-cols" class="row row-cols-3 g-2">
             {{range $index, $_ := .fileinfos}}
             <div id="content-panel" class="content-list col d-flex flex-column justify-content-center align-items-center">
                 <div class="main-color thumbnail thumbnail-color">
@@ -13,7 +13,7 @@
                         </a>
                     {{else if eq .TYPE "movie"}}
                         <a href="/view?filename={{.Name}}" class="d-flex flex-column justify-content-center align-items-center">
-                            <video src="{{.Path}}" controls class="img-fluid center w-100"></video>
+                            <video src="{{.Path}}" controls preload="none" poster="{{.ThPa}}" class="img-fluid center w-100"></video>
                             <p class="text-center w-100">{{.Name}}</p>
                         </a>
                     {{end}}
